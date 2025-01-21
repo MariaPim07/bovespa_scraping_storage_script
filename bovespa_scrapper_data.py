@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions
 
 from bovespa_model import BovespaModel
 
-class BovespaScrapData:
+class BovespaScrapperData:
     def __init__(self): 
         dotenv_path = join(dirname(__file__), '.env')
         main.load_dotenv(dotenv_path)
@@ -22,31 +22,32 @@ class BovespaScrapData:
             self.chrome_driver.get(str(os.environ.get("URL")))
             Select(self.chrome_driver.find_element(By.ID, "segment")).select_by_value("2")
 
-            # while True:
-            WebDriverWait(self.chrome_driver, 10).until(
-                expected_conditions.presence_of_all_elements_located(
-                    (By.XPATH, "//table/tbody"),
-                ),
-            )
-            WebDriverWait(self.chrome_driver, 10).until(
-                expected_conditions.presence_of_all_elements_located(
-                    (By.CLASS_NAME, "pagination-next"),
-                ),
-            )
+            while True:
+                WebDriverWait(self.chrome_driver, 10).until(
+                    expected_conditions.presence_of_all_elements_located(
+                        (By.XPATH, "//table/tbody"),
+                    ),
+                )
+                
+                WebDriverWait(self.chrome_driver, 10).until(
+                    expected_conditions.presence_of_all_elements_located(
+                        (By.CLASS_NAME, "pagination-next"),
+                    ),
+                )
 
-            table = self.chrome_driver.find_element(By.XPATH, "//table/tbody")
-            pagination = self.chrome_driver.find_element(
-                By.CLASS_NAME,
-                "pagination-next",
-            )
+                table = self.chrome_driver.find_element(By.XPATH, "//table/tbody")
+                pagination = self.chrome_driver.find_element(
+                    By.CLASS_NAME,
+                    "pagination-next",
+                )
 
-            rows = table.find_elements(By.TAG_NAME, "tr")
-            self.__group_data(rows)
+                rows = table.find_elements(By.TAG_NAME, "tr")
+                self.__group_data(rows)
 
-            # if "disabled" in pagination.get_dom_attribute("class"):
-            #     break
-            #
-            # self.chrome_driver.execute_script("arguments[0].click();", pagination)
+                if "disabled" in pagination.get_dom_attribute("class"):
+                    break
+
+                pagination.click()
             return self.data
         except Exception as err:
             print(err)
